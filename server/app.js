@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 
+app.use(cors());
 app.use(express.json());
 
 var fs = require("fs"); /* Put it where other modules included */
@@ -61,5 +63,5 @@ app.delete("/products/:id", (req, res) => {
   res.send(product);
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
