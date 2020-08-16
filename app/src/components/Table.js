@@ -9,80 +9,118 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
+import Snackbar from "@material-ui/core/Snackbar";
+import FormDialog from "./FormDialogs";
+import AddFormDialog from "./AddFormDialog";
 
 const useStyles = makeStyles({
   table: {
     minWidth: 650,
   },
+  root: {
+    padding: "20px",
+  },
 });
-
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
 
 export default function DenseTable() {
   const classes = useStyles();
 
   const [data, setData] = useState();
+  const [visible, setVisible] = useState(false);
+  const [notification, setNotification] = useState("");
+  const [closeNotification, setCloseNotification] = useState(false);
+
+  const toggleEditProductFormDialogs = () => {
+    setVisible(!visible);
+  };
+
+  const onEditProduct = () => {};
+
+  const onDeleteProduct = async (id) => {
+    await axios.delete(`http://localhost:5000/products/${id}`);
+    setNotification(`Le produit a bien ete supprime !`);
+    setCloseNotification(true);
+  };
+
+  useEffect(() => {
+    if (closeNotification) {
+      setTimeout(() => {
+        setCloseNotification(false);
+      }, 2000);
+    }
+  }, [data]);
 
   useEffect(() => {
     const fetchData = async () => {
       const result = await axios("http://localhost:5000/products");
-
-      console.log("result", result);
-
       setData(result.data);
-      console.log("data", result.data);
     };
 
     fetchData();
-  }, []);
+  }, [data]);
 
   return (
-    <TableContainer component={Paper}>
-      <Table className={classes.table} size="small" aria-label="a dense table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Products</TableCell>
-            <TableCell align="right">Type</TableCell>
-            <TableCell align="right">Price</TableCell>
-            <TableCell align="right">Rating</TableCell>
-            <TableCell align="right">warranty_years</TableCell>
-            <TableCell align="right">available</TableCell>
-            <TableCell></TableCell>
-            <TableCell></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data &&
-            data.map((d) => (
-              <TableRow key={d._id}>
-                <TableCell component="th" scope="row">
-                  {d.name}
-                </TableCell>
-                <TableCell align="right">{d.type}</TableCell>
-                <TableCell align="right">{d.price}</TableCell>
-                <TableCell align="right">{d.rating}</TableCell>
-                <TableCell align="right">{d.warranty_years}</TableCell>
-                <TableCell>{d.available.toString()}</TableCell>
-                <TableCell>
-                  <Button variant="contained" color="primary">
-                    Modifier
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => this.handleModify(d)}
-                  >
-                    Supprimer
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <>
+      {notification && (
+        <Snackbar open={closeNotification} autoHideDuration={2000}>
+          <div severity="success">{notification}</div>
+        </Snackbar>
+      )}
+      <div>
+        <AddFormDialog />
+      </div>
+      <TableContainer classes={{ root: classes.root }} component={Paper}>
+        <Table
+          className={classes.table}
+          size="small"
+          aria-label="a dense table"
+        >
+          <TableHead>
+            <TableRow>
+              <TableCell>Products</TableCell>
+              <TableCell align="right">Type</TableCell>
+              <TableCell align="right">Price</TableCell>
+              <TableCell align="right">Rating</TableCell>
+              <TableCell align="right">warranty_years</TableCell>
+              <TableCell align="right">available</TableCell>
+              <TableCell></TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data &&
+              data.map((d) => (
+                <TableRow key={d._id}>
+                  <TableCell component="th" scope="row">
+                    {d.name}
+                  </TableCell>
+                  <TableCell align="right">{d.type}</TableCell>
+                  <TableCell align="right">{d.price}</TableCell>
+                  <TableCell align="right">{d.rating}</TableCell>
+                  <TableCell align="right">{d.warranty_years}</TableCell>
+                  <TableCell>{d.available.toString()}</TableCell>
+                  <TableCell>
+                    <FormDialog
+                      open={visible}
+                      onClose={toggleEditProductFormDialogs}
+                      product={d}
+                      onClick={onEditProduct}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => onDeleteProduct(d._id)}
+                    >
+                      Supprimer
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }
