@@ -9,7 +9,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
 export default function FormDialog(props) {
-  const { product, onClick } = props;
+  const { product, setData } = props;
 
   const [open, setOpen] = useState(false);
   const [editProduct, setEditProduct] = useState(product);
@@ -22,15 +22,15 @@ export default function FormDialog(props) {
     setOpen(false);
   };
 
-  const handleEdit = (editProduct) => {
+  const handleEdit = () => {
     axios
       .put(`http://localhost:5000/products/${editProduct._id}`, editProduct)
       .then((res) => {
         setEditProduct(res.data);
+        setData(undefined);
       })
       .catch((err) => console.log(err));
     setOpen(false);
-    onClick();
   };
 
   return (
@@ -43,7 +43,7 @@ export default function FormDialog(props) {
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
       >
-        <DialogTitle id={product._id}>{product.name}</DialogTitle>
+        <DialogTitle id={editProduct._id}>{editProduct.name}</DialogTitle>
         <DialogContent>
           <DialogContentText>Modify your product</DialogContentText>
           <TextField
@@ -51,81 +51,80 @@ export default function FormDialog(props) {
             margin="dense"
             id="name"
             label="Product's name"
-            defaultValue={product.name}
+            defaultValue={editProduct.name}
             type="text"
             fullWidth
             onChange={(e) =>
-              setEditProduct({ ...product, name: e.target.value })
+              setEditProduct({ ...editProduct, name: e.target.value })
             }
           />
 
           <TextField
-            autoFocus
             margin="dense"
             id="name"
             label="Type"
-            defaultValue={product.type}
+            defaultValue={editProduct.type}
             type="text"
             onChange={(e) =>
-              setEditProduct({ ...product, type: e.target.value })
+              setEditProduct({ ...editProduct, type: e.target.value })
             }
             fullWidth
           />
           <TextField
-            autoFocus
             margin="dense"
             id="name"
             label="Price"
-            defaultValue={product.price}
+            defaultValue={editProduct.price}
             type="text"
             onChange={(e) =>
-              setEditProduct({ ...product, price: e.target.value })
+              setEditProduct({ ...editProduct, price: e.target.value })
             }
             fullWidth
           />
           <TextField
-            autoFocus
             margin="dense"
             id="name"
             label="Rating"
-            defaultValue={product.rating}
+            defaultValue={editProduct.rating}
             onChange={(e) =>
-              setEditProduct({ ...product, rating: e.target.value })
+              setEditProduct({ ...editProduct, rating: e.target.value })
             }
             type="text"
             fullWidth
           />
           <TextField
-            autoFocus
             margin="dense"
             id="name"
             label="Warranty_years"
-            defaultValue={product.warranty_years}
+            defaultValue={editProduct.warranty_years}
             onChange={(e) =>
-              setEditProduct({ ...product, warranty_years: e.target.value })
+              setEditProduct({ ...editProduct, warranty_years: e.target.value })
             }
             type="text"
             fullWidth
           />
           <TextField
-            autoFocus
             margin="dense"
             id="name"
             label="available"
-            defaultValue={product.available}
+            defaultValue={editProduct.available}
             onChange={(e) =>
-              setEditProduct({ ...product, available: e.target.value })
+              setEditProduct({ ...editProduct, available: e.target.value })
             }
             type="text"
             fullWidth
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={() => handleEdit(editProduct)} color="primary">
+          <Button
+            variant="contained"
+            onClick={() => handleEdit()}
+            color="primary"
+          >
             Edit
+          </Button>
+          <Button variant="contained" onClick={handleClose} color="secondary">
+            Cancel
           </Button>
         </DialogActions>
       </Dialog>

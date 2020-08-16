@@ -5,10 +5,11 @@ import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
 export default function AddFormDialog(props) {
+  const { setData } = props;
+
   const [open, setOpen] = useState(false);
   const [addProduct, setAddProduct] = useState({});
 
@@ -23,6 +24,7 @@ export default function AddFormDialog(props) {
   const handleAdd = async () => {
     await axios.post(`http://localhost:5000/products/`, addProduct);
     setOpen(false);
+    setData(undefined);
   };
 
   return (

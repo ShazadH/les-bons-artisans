@@ -34,12 +34,11 @@ export default function DenseTable() {
     setVisible(!visible);
   };
 
-  const onEditProduct = () => {};
-
   const onDeleteProduct = async (id) => {
     await axios.delete(`http://localhost:5000/products/${id}`);
     setNotification(`Le produit a bien ete supprime !`);
     setCloseNotification(true);
+    setData(undefined);
   };
 
   useEffect(() => {
@@ -48,7 +47,7 @@ export default function DenseTable() {
         setCloseNotification(false);
       }, 2000);
     }
-  }, [data]);
+  }, [closeNotification]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,7 +55,9 @@ export default function DenseTable() {
       setData(result.data);
     };
 
-    fetchData();
+    if (data === undefined) {
+      fetchData();
+    }
   }, [data]);
 
   return (
@@ -67,7 +68,7 @@ export default function DenseTable() {
         </Snackbar>
       )}
       <div>
-        <AddFormDialog />
+        <AddFormDialog setData={setData} />
       </div>
       <TableContainer classes={{ root: classes.root }} component={Paper}>
         <Table
@@ -104,7 +105,7 @@ export default function DenseTable() {
                       open={visible}
                       onClose={toggleEditProductFormDialogs}
                       product={d}
-                      onClick={onEditProduct}
+                      setData={setData}
                     />
                   </TableCell>
                   <TableCell>
