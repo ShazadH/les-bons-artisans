@@ -1,12 +1,12 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const fs = require("fs");
 
 app.use(cors());
 app.use(express.json());
 
-var fs = require("fs"); /* Put it where other modules included */
-var products = JSON.parse(
+let products = JSON.parse(
   fs.readFileSync("./products.json", "utf8")
 ); /* Inside the get function */
 
