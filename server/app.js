@@ -1,29 +1,54 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const fs = require("fs");
+// const fs = require("fs");
+const MongoClient = require("mongodb").MongoClient;
+const assert = require("assert");
+const { send } = require("process");
 
 app.use(cors());
+
 app.use(express.json());
 
-let products = JSON.parse(
-  fs.readFileSync("./products.json", "utf8")
-); /* Inside the get function */
+// Connection URL
+const url = "mongodb://localhost:27017";
+
+// Database Name
+const dbName = "lesbonsartisans";
+
+// Create a new MongoClient
+const client = new MongoClient(url);
 
 app.get("/products", (req, res) => {
-  res.send(products);
+  client.connect(function (err) {
+    assert.equal(null, err);
+    console.log("Connected successfully to server");
+
+    const db = client.db(dbName);
+    const collection = db.collection("lba");
+    collection.find({}).toArray(function (err, docs) {
+      res.send(docs);
+    });
+  });
 });
 
 app.get("/products/:id", (req, res) => {
-  const product = products.find((c) => c._id === parseInt(req.params.id));
-  if (!product)
-    res.status(404).send("The product with the given ID was not found");
-  res.send(product);
+  client.connect(function (err) {
+    assert.equal(null, err);
+    console.log("Connected successfully to server");
+
+    const db = client.db(dbName);
+    const collection = db.collection("lba");
+    collection
+      .find({ _id: parseInt(req.params.id) })
+      .toArray(function (err, docs) {
+        res.send(docs);
+      });
+  });
 });
 
 app.post("/products", (req, res) => {
   const product = {
-    _id: products.length + 1,
     name: req.body.name,
     type: req.body.type,
     price: req.body.price,
@@ -31,11 +56,21 @@ app.post("/products", (req, res) => {
     warranty_years: req.body.warranty_years,
     available: req.body.available,
   };
-  products.push(product);
-  res.send(product);
+
+  client.connect(function (err) {
+    assert.equal(null, err);
+    console.log("Connected successfully to server");
+
+    const db = client.db(dbName);
+    const collection = db.collection("lba");
+    collection.insertOne(product, function (err, docs) {
+      res.send(docs);
+    });
+  });
 });
 
-app.put("/products/:id", (req, res) => {
+app.put("/products", (req, res) => {
+  console.log(req.body);
   const product = {
     name: req.body.name,
     type: req.body.type,
@@ -45,22 +80,32 @@ app.put("/products/:id", (req, res) => {
     available: req.body.available,
   };
 
-  const objIndex = products.findIndex(
-    (obj) => obj._id === parseInt(req.params.id)
-  );
-  products[objIndex] = { _id: +req.params.id, ...product };
-  res.send(product);
+  client.connect(function (err) {
+    assert.equal(null, err);
+    console.log("Connected successfully to server");
+
+    const db = client.db(dbName);
+    const collection = db.collection("lba");
+    collection.updateOne({ name }, { $set: { product } }, function (err, docs) {
+      res.send(docs);
+    });
+  });
 });
 
 app.delete("/products/:id", (req, res) => {
-  const product = products.find((p) => p._id === parseInt(req.params.id));
-  if (!product)
-    res.status(404).send("The product with the given ID was not found");
+  client.connect(function (err) {
+    assert.equal(null, err);
+    console.log("Connected successfully to server");
 
-  const index = products.indexOf(product);
-  products.splice(index, 1);
-
-  res.send(product);
+    const db = client.db(dbName);
+    const collection = db.collection("lba");
+    collection.deleteOne({ _id: parseInt(req.params.id) }, function (
+      err,
+      docs
+    ) {
+      res.send(docs);
+    });
+  });
 });
 
 const port = process.env.PORT || 5000;
